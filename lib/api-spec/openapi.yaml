@@ -3,20 +3,27 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Rota Sacoleira API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: categorias
+    description: Store categories
+  - name: lojas
+    description: Stores and suppliers
+  - name: favoritos
+    description: User favorites
+  - name: roteiro
+    description: Route optimization
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +31,350 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /categorias:
+    get:
+      operationId: listCategorias
+      tags: [categorias]
+      summary: List all categories
+      responses:
+        "200":
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Categoria"
+
+  /lojas:
+    get:
+      operationId: listLojas
+      tags: [lojas]
+      summary: List stores with optional filters
+      parameters:
+        - name: categoriaId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: search
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: emDestaque
+          in: query
+          schema:
+            type: ["boolean", "null"]
+      responses:
+        "200":
+          description: List of stores
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Loja"
+    post:
+      operationId: createLoja
+      tags: [lojas]
+      summary: Create a new store
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LojaInput"
+      responses:
+        "201":
+          description: Created store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Loja"
+
+  /lojas/{id}:
+    get:
+      operationId: getLoja
+      tags: [lojas]
+      summary: Get a single store by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Store details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Loja"
+        "404":
+          description: Not found
+
+  /favoritos:
+    get:
+      operationId: listFavoritos
+      tags: [favoritos]
+      summary: List all favorited stores grouped by category
+      responses:
+        "200":
+          description: Favorites grouped by category
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FavoritoGroup"
+    post:
+      operationId: addFavorito
+      tags: [favoritos]
+      summary: Add a store to favorites
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FavoritoInput"
+      responses:
+        "201":
+          description: Favorited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Favorito"
+
+  /favoritos/{lojaId}:
+    delete:
+      operationId: removeFavorito
+      tags: [favoritos]
+      summary: Remove a store from favorites
+      parameters:
+        - name: lojaId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Removed
+
+  /favoritos/check/{lojaId}:
+    get:
+      operationId: checkFavorito
+      tags: [favoritos]
+      summary: Check if a store is favorited
+      parameters:
+        - name: lojaId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Favorite status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FavoritoStatus"
+
+  /roteiro:
+    post:
+      operationId: calcularRoteiro
+      tags: [roteiro]
+      summary: Calculate optimized shopping route for selected stores
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoteiroInput"
+      responses:
+        "200":
+          description: Optimized route
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Roteiro"
+
+  /lojas/destaque/summary:
+    get:
+      operationId: getDestaqueSummary
+      tags: [lojas]
+      summary: Get featured stores count and category breakdown
+      responses:
+        "200":
+          description: Summary stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DestaqueSummary"
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    Categoria:
+      type: object
+      required: [id, nome, icone]
+      properties:
+        id:
+          type: integer
+        nome:
+          type: string
+        icone:
+          type: string
+        totalLojas:
+          type: integer
+
+    Loja:
+      type: object
+      required: [id, nome, endereco, categoriaId, categoriaNome, emDestaque]
+      properties:
+        id:
+          type: integer
+        nome:
+          type: string
+        endereco:
+          type: string
+        whatsapp:
+          type: ["string", "null"]
+        regrasAtacado:
+          type: ["string", "null"]
+        emDestaque:
+          type: boolean
+        latitude:
+          type: ["number", "null"]
+        longitude:
+          type: ["number", "null"]
+        categoriaId:
+          type: integer
+        categoriaNome:
+          type: string
+        categoriaIcone:
+          type: string
+
+    LojaInput:
+      type: object
+      required: [nome, endereco, categoriaId]
+      properties:
+        nome:
+          type: string
+        endereco:
+          type: string
+        whatsapp:
+          type: string
+        regrasAtacado:
+          type: string
+        emDestaque:
+          type: boolean
+        latitude:
+          type: number
+        longitude:
+          type: number
+        categoriaId:
+          type: integer
+
+    Favorito:
+      type: object
+      required: [id, lojaId, loja]
+      properties:
+        id:
+          type: integer
+        lojaId:
+          type: integer
+        loja:
+          $ref: "#/components/schemas/Loja"
+
+    FavoritoInput:
+      type: object
+      required: [lojaId]
+      properties:
+        lojaId:
+          type: integer
+
+    FavoritoGroup:
+      type: object
+      required: [categoriaId, categoriaNome, categoriaIcone, lojas]
+      properties:
+        categoriaId:
+          type: integer
+        categoriaNome:
+          type: string
+        categoriaIcone:
+          type: string
+        lojas:
+          type: array
+          items:
+            $ref: "#/components/schemas/Loja"
+
+    FavoritoStatus:
+      type: object
+      required: [isFavorito]
+      properties:
+        isFavorito:
+          type: boolean
+
+    RoteiroInput:
+      type: object
+      required: [lojaIds]
+      properties:
+        lojaIds:
+          type: array
+          items:
+            type: integer
+
+    RoteiroParada:
+      type: object
+      required: [ordem, loja, distanciaAnterior, tempoEstimado]
+      properties:
+        ordem:
+          type: integer
+        loja:
+          $ref: "#/components/schemas/Loja"
+        distanciaAnterior:
+          type: ["number", "null"]
+        tempoEstimado:
+          type: ["integer", "null"]
+
+    Roteiro:
+      type: object
+      required: [paradas, distanciaTotal, tempoTotal, mapUrl]
+      properties:
+        paradas:
+          type: array
+          items:
+            $ref: "#/components/schemas/RoteiroParada"
+        distanciaTotal:
+          type: number
+        tempoTotal:
+          type: integer
+        mapUrl:
+          type: string
+
+    DestaqueSummary:
+      type: object
+      required: [totalLojas, totalDestaques, porCategoria]
+      properties:
+        totalLojas:
+          type: integer
+        totalDestaques:
+          type: integer
+        porCategoria:
+          type: array
+          items:
+            type: object
+            required: [categoriaId, categoriaNome, total]
+            properties:
+              categoriaId:
+                type: integer
+              categoriaNome:
+                type: string
+              total:
+                type: integer

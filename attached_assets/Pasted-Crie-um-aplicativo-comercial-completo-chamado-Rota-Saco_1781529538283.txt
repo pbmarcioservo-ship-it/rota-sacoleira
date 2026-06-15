@@ -1,0 +1,18 @@
+Crie um aplicativo comercial completo chamado "Rota Sacoleira" usando React, Vite e Tailwind CSS. O layout deve ser totalmente limpo, moderno, profissional e responsivo para celulares (Mobile-first), focado em comércio e guias de compras.
+
+Funcionalidades e Telas que devem ser criadas:
+
+1. BANCO DE DADOS INTERNO (Replit DB/Postgres): Crie três tabelas estruturadas na memória do projeto: `rs_categorias`, `rs_lojas` (com nome, endereço, whatsapp, regras_atacado, em_destaque, latitude, longitude) e `rs_favoritos`.
+
+2. TELA INICIAL (Dashboard de Negócios): 
+   - No topo, uma barra de pesquisa de lojas e fornecedores.
+   - Logo abaixo, uma seção vertical ou carrossel horizontal elegante contendo "Lojas em Destaque" (Vitrine Premium).
+   - Abaixo dos destaques, uma grade (Grid) fixa de duas colunas com Cards Retangulares Verticais e limpos para as Categorias de produtos (Moda Feminina, Moda Masculina, Brinquedos, Eletrônicos, Calçados, Bolsas). Cada card deve ter um design minimalista, cantos arredondados, uma borda sutil, o nome da categoria centralizado em negrito e um ícone comercial elegante que represente o nicho.
+
+3. TELA DE LISTA COMERCIAL (A-Z): Ao clicar em um card de categoria da tela inicial, abre uma lista em ordem alfabética das lojas pertencentes àquele nicho. Cada linha de loja deve ser limpa e conter: Nome do fornecedor, endereço curto do box/loja, um Checkbox (quadradinho de seleção para o roteiro) do lado esquerdo e um botão de Favoritar (ícone de coração ou marcador de páginas) do lado direito.
+
+4. MÓDULO DE ROTEIRIZAÇÃO: Quando o usuário marcar os checkboxes de até 10 lojas na lista comercial, deve aparecer de forma elegante um botão fixo na parte inferior da tela chamado "Traçar Trajeto de Compras". Ao clicar, simule a abertura de um mapa ou painel mostrando as ruas e o trajeto otimizado entre os fornecedores selecionados.
+
+5. MENU LATERAL DE FAVORITOS: Crie um menu lateral (acessado por três tracinhos no topo) que dê acesso à aba de "Lojas Salvas", exibindo os fornecedores favoritados pelo usuário automaticamente agrupados e separados por suas respectivas categorias de produto.
+
+Gere o projeto populando o banco com dados fictícios de lojas reais de atacado do Brás e Bom Retiro para que eu possa testar imediatamente as seleções e o visual na tela.
