@@ -86,6 +86,32 @@ export interface Roteiro {
   mapUrl: string;
 }
 
+export interface PlaceResult {
+  placeId: string;
+  nome: string;
+  endereco: string;
+  /** @nullable */
+  whatsapp?: string | null;
+  /** @nullable */
+  latitude?: number | null;
+  /** @nullable */
+  longitude?: number | null;
+}
+
+export interface SavePlaceInput {
+  placeId: string;
+  nome: string;
+  endereco: string;
+  /** @nullable */
+  whatsapp?: string | null;
+  /** @nullable */
+  latitude?: number | null;
+  /** @nullable */
+  longitude?: number | null;
+  categoriaId: number;
+  favoritar?: boolean;
+}
+
 export type DestaqueSummaryPorCategoriaItem = {
   categoriaId: number;
   categoriaNome: string;
@@ -111,5 +137,9 @@ search?: string | null;
  * @nullable
  */
 emDestaque?: boolean | null;
+};
+
+export type SearchPlacesParams = {
+q: string;
 };
 

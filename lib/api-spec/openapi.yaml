@@ -179,6 +179,50 @@ paths:
               schema:
                 $ref: "#/components/schemas/FavoritoStatus"
 
+  /places/search:
+    get:
+      operationId: searchPlaces
+      tags: [lojas]
+      summary: Search Google Places API restricted to São Paulo, returning results not in internal DB
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Places search results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PlaceResult"
+        "400":
+          description: Bad request
+        "503":
+          description: Places API unavailable
+
+  /places/save:
+    post:
+      operationId: savePlace
+      tags: [lojas]
+      summary: Save a Google Place as an internal store and optionally favorite it
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SavePlaceInput"
+      responses:
+        "201":
+          description: Saved store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Loja"
+
   /roteiro:
     post:
       operationId: calcularRoteiro
@@ -357,6 +401,44 @@ components:
           type: integer
         mapUrl:
           type: string
+
+    PlaceResult:
+      type: object
+      required: [placeId, nome, endereco]
+      properties:
+        placeId:
+          type: string
+        nome:
+          type: string
+        endereco:
+          type: string
+        whatsapp:
+          type: ["string", "null"]
+        latitude:
+          type: ["number", "null"]
+        longitude:
+          type: ["number", "null"]
+
+    SavePlaceInput:
+      type: object
+      required: [placeId, nome, endereco, categoriaId]
+      properties:
+        placeId:
+          type: string
+        nome:
+          type: string
+        endereco:
+          type: string
+        whatsapp:
+          type: ["string", "null"]
+        latitude:
+          type: ["number", "null"]
+        longitude:
+          type: ["number", "null"]
+        categoriaId:
+          type: integer
+        favoritar:
+          type: boolean
 
     DestaqueSummary:
       type: object

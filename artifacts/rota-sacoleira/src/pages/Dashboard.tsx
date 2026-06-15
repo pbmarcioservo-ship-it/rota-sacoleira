@@ -1,8 +1,13 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
-import { useListCategorias, getListCategoriasQueryKey, useListLojas, getListLojasQueryKey } from "@workspace/api-client-react";
+import {
+  useListCategorias, getListCategoriasQueryKey,
+  useListLojas, getListLojasQueryKey,
+  useSearchPlaces, getSearchPlacesQueryKey,
+} from "@workspace/api-client-react";
 import { CategoryCard } from "@/components/CategoryCard";
 import { StoreCard } from "@/components/StoreCard";
+import { HybridSearchResults } from "@/components/HybridSearchResults";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,6 +19,8 @@ export default function Dashboard() {
   const [bairro, setBairro] = useState<Bairro>("todos");
   const [ruaSearch, setRuaSearch] = useState("");
 
+  const isSearching = search.length > 2;
+
   const { data: categorias, isLoading: loadingCategorias } = useListCategorias({
     query: { queryKey: getListCategoriasQueryKey() }
   });
@@ -23,13 +30,25 @@ export default function Dashboard() {
     { query: { queryKey: getListLojasQueryKey({ emDestaque: true }) } }
   );
 
-  const { data: searchResults, isLoading: loadingSearch } = useListLojas(
+  const { data: internalResults, isLoading: loadingInternal } = useListLojas(
     { search: search || undefined },
-    { query: { queryKey: getListLojasQueryKey({ search: search || undefined }), enabled: search.length > 2 } }
+    { query: { queryKey: getListLojasQueryKey({ search: search || undefined }), enabled: isSearching } }
+  );
+
+  const { data: placesResults, isLoading: loadingPlaces } = useSearchPlaces(
+    { q: search },
+    { query: { queryKey: getSearchPlacesQueryKey({ q: search }), enabled: isSearching } }
   );
 
   const filteredDestaques = filterByBairroAndRua(lojasDestaque ?? [], bairro, ruaSearch);
-  const filteredSearch = filterByBairroAndRua(searchResults ?? [], bairro, ruaSearch);
+
+  const filteredInternal = filterByBairroAndRua(internalResults ?? [], bairro, ruaSearch);
+
+  const internalNames = new Set((internalResults ?? []).map(l => l.nome.toLowerCase()));
+  const dedupedExternal = (placesResults ?? []).filter(
+    p => !internalNames.has(p.nome.toLowerCase())
+  );
+  const filteredExternal = filterByBairroAndRua(dedupedExternal, bairro, ruaSearch);
 
   return (
     <AppLayout title="Início">
@@ -39,7 +58,7 @@ export default function Dashboard() {
         <div className="relative">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <Input
-            placeholder="Buscar loja ou categoria..."
+            placeholder="Buscar loja, rua ou bairro em São Paulo..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             data-testid="input-search"
@@ -55,26 +74,17 @@ export default function Dashboard() {
           onRuaSearch={setRuaSearch}
         />
 
-        {search.length > 2 ? (
+        {isSearching ? (
           <div className="space-y-4">
-            <h2 className="text-xl font-bold tracking-tight text-foreground">Resultados</h2>
-            {loadingSearch ? (
-              <div className="space-y-3">
-                <Skeleton className="h-28 w-full rounded-xl" />
-                <Skeleton className="h-28 w-full rounded-xl" />
-              </div>
-            ) : filteredSearch.length > 0 ? (
-              <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
-                {filteredSearch.map(loja => (
-                  <StoreCard key={loja.id} store={loja} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12 text-muted-foreground">
-                Nenhuma loja encontrada para "{search}"
-                {bairro !== "todos" || ruaSearch ? " com os filtros aplicados" : ""}.
-              </div>
-            )}
+            <h2 className="text-xl font-bold tracking-tight text-foreground">
+              Resultados para "{search}"
+            </h2>
+            <HybridSearchResults
+              internalResults={filteredInternal}
+              externalResults={filteredExternal}
+              isLoadingInternal={loadingInternal}
+              isLoadingExternal={loadingPlaces}
+            />
           </div>
         ) : (
           <>
@@ -90,7 +100,6 @@ export default function Dashboard() {
                 </div>
               ) : filteredDestaques.length > 0 ? (
                 <>
-                  {/* Mobile: horizontal scroll */}
                   <ScrollArea className="w-full whitespace-nowrap pb-4 -mx-4 lg:hidden px-4">
                     <div className="flex gap-4 w-max">
                       {filteredDestaques.map(loja => (
@@ -99,7 +108,6 @@ export default function Dashboard() {
                     </div>
                     <ScrollBar orientation="horizontal" className="invisible" />
                   </ScrollArea>
-                  {/* Desktop: grid */}
                   <div className="hidden lg:grid lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {filteredDestaques.map(loja => (
                       <StoreCard key={loja.id} store={loja} featured />

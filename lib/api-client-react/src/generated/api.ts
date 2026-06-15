@@ -30,8 +30,11 @@ import type {
   ListLojasParams,
   Loja,
   LojaInput,
+  PlaceResult,
   Roteiro,
-  RoteiroInput
+  RoteiroInput,
+  SavePlaceInput,
+  SearchPlacesParams
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -726,6 +729,161 @@ export function useCheckFavorito<TData = Awaited<ReturnType<typeof checkFavorito
 
 
 
+
+export const getSearchPlacesUrl = (params: SearchPlacesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/places/search?${stringifiedParams}` : `/api/places/search`
+}
+
+/**
+ * @summary Search Google Places API restricted to São Paulo, returning results not in internal DB
+ */
+export const searchPlaces = async (params: SearchPlacesParams, options?: RequestInit): Promise<PlaceResult[]> => {
+
+  return customFetch<PlaceResult[]>(getSearchPlacesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getSearchPlacesQueryKey = (params?: SearchPlacesParams,) => {
+    return [
+    `/api/places/search`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getSearchPlacesQueryOptions = <TData = Awaited<ReturnType<typeof searchPlaces>>, TError = ErrorType<void>>(params: SearchPlacesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof searchPlaces>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getSearchPlacesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof searchPlaces>>> = ({ signal }) => searchPlaces(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof searchPlaces>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type SearchPlacesQueryResult = NonNullable<Awaited<ReturnType<typeof searchPlaces>>>
+export type SearchPlacesQueryError = ErrorType<void>
+
+
+/**
+ * @summary Search Google Places API restricted to São Paulo, returning results not in internal DB
+ */
+
+export function useSearchPlaces<TData = Awaited<ReturnType<typeof searchPlaces>>, TError = ErrorType<void>>(
+ params: SearchPlacesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof searchPlaces>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getSearchPlacesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getSavePlaceUrl = () => {
+
+
+
+
+  return `/api/places/save`
+}
+
+/**
+ * @summary Save a Google Place as an internal store and optionally favorite it
+ */
+export const savePlace = async (savePlaceInput: SavePlaceInput, options?: RequestInit): Promise<Loja> => {
+
+  return customFetch<Loja>(getSavePlaceUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      savePlaceInput,)
+  }
+);}
+
+
+
+
+export const getSavePlaceMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof savePlace>>, TError,{data: BodyType<SavePlaceInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof savePlace>>, TError,{data: BodyType<SavePlaceInput>}, TContext> => {
+
+const mutationKey = ['savePlace'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof savePlace>>, {data: BodyType<SavePlaceInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  savePlace(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SavePlaceMutationResult = NonNullable<Awaited<ReturnType<typeof savePlace>>>
+    export type SavePlaceMutationBody = BodyType<SavePlaceInput>
+    export type SavePlaceMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Save a Google Place as an internal store and optionally favorite it
+ */
+export const useSavePlace = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof savePlace>>, TError,{data: BodyType<SavePlaceInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof savePlace>>,
+        TError,
+        {data: BodyType<SavePlaceInput>},
+        TContext
+      > => {
+      return useMutation(getSavePlaceMutationOptions(options));
+    }
 
 export const getCalcularRoteiroUrl = () => {
 

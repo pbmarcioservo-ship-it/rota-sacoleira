@@ -143,6 +143,39 @@ export const CheckFavoritoResponse = zod.object({
 
 
 /**
+ * @summary Search Google Places API restricted to São Paulo, returning results not in internal DB
+ */
+export const SearchPlacesQueryParams = zod.object({
+  "q": zod.coerce.string()
+})
+
+export const SearchPlacesResponseItem = zod.object({
+  "placeId": zod.string(),
+  "nome": zod.string(),
+  "endereco": zod.string(),
+  "whatsapp": zod.string().nullish(),
+  "latitude": zod.number().nullish(),
+  "longitude": zod.number().nullish()
+})
+export const SearchPlacesResponse = zod.array(SearchPlacesResponseItem)
+
+
+/**
+ * @summary Save a Google Place as an internal store and optionally favorite it
+ */
+export const SavePlaceBody = zod.object({
+  "placeId": zod.string(),
+  "nome": zod.string(),
+  "endereco": zod.string(),
+  "whatsapp": zod.string().nullish(),
+  "latitude": zod.number().nullish(),
+  "longitude": zod.number().nullish(),
+  "categoriaId": zod.number(),
+  "favoritar": zod.boolean().optional()
+})
+
+
+/**
  * @summary Calculate optimized shopping route for selected stores
  */
 export const CalcularRoteiroBody = zod.object({
