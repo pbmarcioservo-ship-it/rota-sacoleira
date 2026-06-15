@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
-import { Menu, Heart, Home, PackageSearch } from "lucide-react";
+import { Menu, Heart, Home, PackageSearch, ShieldCheck } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 
@@ -45,6 +45,18 @@ export function AppLayout({ children, title }: { children: React.ReactNode; titl
                 </Button>
               </Link>
             </nav>
+            <div className="px-3 pb-4">
+              <Link href="/admin" className="w-full">
+                <Button
+                  variant={location === "/admin" ? "secondary" : "ghost"}
+                  className="w-full justify-start h-10 text-sm font-medium text-muted-foreground"
+                  data-testid="link-admin"
+                >
+                  <ShieldCheck className="w-4 h-4 mr-3 text-muted-foreground" />
+                  Área do Administrador
+                </Button>
+              </Link>
+            </div>
             <div className="p-6 border-t border-border">
               <p className="text-sm text-muted-foreground font-medium">Guia Comercial Brás e Bom Retiro</p>
             </div>

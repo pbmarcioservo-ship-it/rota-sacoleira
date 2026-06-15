@@ -1,0 +1,19 @@
+Excelente! Vamos avançar com as melhorias no aplicativo "Rota Sacoleira". 
+
+ATENÇÃO: Não utilize nenhum dado fictício ou inventado. Todas as lojas, endereços, contatos e informações cadastradas inicialmente no banco de dados interno devem ser BASEADAS EM LOJAS E DADOS REAIS do Brás, Bom Retiro, Pari e Bresser.
+
+Por favor, aplique as seguintes atualizações no projeto:
+
+1. RESPONSIVIDADE DO LAYOUT (Cenário Desktop): Ajuste o container principal para que, quando aberto no computador (PC), ele se expanda na horizontal (use max-w-7xl ou similar). A grade de Categorias deve passar de 2 para 3 ou 4 colunas no monitor, aproveitando totalmente as laterais da tela. O visual só deve ficar estreito (estilo celular) quando o acesso for por dispositivos móveis.
+
+2. EXPANSÃO DE CATEGORIAS E REGIÕES (DADOS REAIS): 
+   - Adicione duas novas categorias: "Armarinhos" e "Casa e Decoração".
+   - Expanda as regiões de atendimento para incluir: [Todos], [Brás], [Bom Retiro], [Pari], [Bresser].
+   - Popule o banco interno com lojas REAIS para as novas regiões (Ex: lojas de Brinquedos/Decoração reais no Pari, e lojas de Moda/Armarinhos reais na Bresser).
+
+3. FILTRO E BUSCA POR BAIRRO: No topo da tela, além dos botões de clique rápido das regiões, adicione uma pequena barra de pesquisa (ícone de lupa) exclusiva para bairros/ruas, permitindo que o usuário digite ou selecione a região exata que deseja filtrar.
+
+4. ÁREA ADMINISTRATIVA INTERNA (Painel do Admin): 
+   - Crie uma rota ou botão discreto no menu lateral para acessar a "Área do Administrador".
+   - Nesta área, crie um formulário funcional para inclusão de novas lojas reais. O formulário deve conter os campos: Nome da Loja, Endereço Completo, Bairro/Região, Categoria, WhatsApp, Regras de Atacado (Mínimo de peças) e uma opção para marcar se a loja é "Destaque".
+   - Ao clicar em "Salvar Loja", esse novo estabelecimento deve ser inserido diretamente no banco de dados interno do aplicativo, aparecendo automaticamente no mapa e nas buscas dos usuários.

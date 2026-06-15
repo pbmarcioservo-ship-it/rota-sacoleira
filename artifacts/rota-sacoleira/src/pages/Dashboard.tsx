@@ -7,11 +7,12 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { BairroFilter, detectBairro, type Bairro } from "@/components/BairroFilter";
+import { BairroFilter, filterByBairroAndRua, type Bairro } from "@/components/BairroFilter";
 
 export default function Dashboard() {
   const [search, setSearch] = useState("");
   const [bairro, setBairro] = useState<Bairro>("todos");
+  const [ruaSearch, setRuaSearch] = useState("");
 
   const { data: categorias, isLoading: loadingCategorias } = useListCategorias({
     query: { queryKey: getListCategoriasQueryKey() }
@@ -27,19 +28,14 @@ export default function Dashboard() {
     { query: { queryKey: getListLojasQueryKey({ search: search || undefined }), enabled: search.length > 2 } }
   );
 
-  const filteredDestaques = lojasDestaque?.filter(l =>
-    bairro === "todos" ? true : detectBairro(l.endereco) === bairro
-  );
-
-  const filteredSearch = searchResults?.filter(l =>
-    bairro === "todos" ? true : detectBairro(l.endereco) === bairro
-  );
+  const filteredDestaques = filterByBairroAndRua(lojasDestaque ?? [], bairro, ruaSearch);
+  const filteredSearch = filterByBairroAndRua(searchResults ?? [], bairro, ruaSearch);
 
   return (
     <AppLayout title="Início">
-      <div className="px-4 lg:px-8 py-6 space-y-8">
+      <div className="px-4 lg:px-8 py-6 space-y-6">
 
-        {/* Search */}
+        {/* Main search */}
         <div className="relative">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <Input
@@ -51,10 +47,13 @@ export default function Dashboard() {
           />
         </div>
 
-        {/* Bairro Filter */}
-        <div className="overflow-x-auto -mx-4 lg:-mx-8 px-4 lg:px-8 pb-1">
-          <BairroFilter value={bairro} onChange={setBairro} />
-        </div>
+        {/* Bairro Filter + rua search */}
+        <BairroFilter
+          value={bairro}
+          onChange={setBairro}
+          ruaSearch={ruaSearch}
+          onRuaSearch={setRuaSearch}
+        />
 
         {search.length > 2 ? (
           <div className="space-y-4">
@@ -64,7 +63,7 @@ export default function Dashboard() {
                 <Skeleton className="h-28 w-full rounded-xl" />
                 <Skeleton className="h-28 w-full rounded-xl" />
               </div>
-            ) : filteredSearch && filteredSearch.length > 0 ? (
+            ) : filteredSearch.length > 0 ? (
               <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
                 {filteredSearch.map(loja => (
                   <StoreCard key={loja.id} store={loja} />
@@ -73,7 +72,7 @@ export default function Dashboard() {
             ) : (
               <div className="text-center py-12 text-muted-foreground">
                 Nenhuma loja encontrada para "{search}"
-                {bairro !== "todos" ? ` no bairro selecionado` : ""}.
+                {bairro !== "todos" || ruaSearch ? " com os filtros aplicados" : ""}.
               </div>
             )}
           </div>
@@ -81,17 +80,15 @@ export default function Dashboard() {
           <>
             {/* Lojas em Destaque */}
             <section className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold tracking-tight text-foreground">Lojas em Destaque</h2>
-              </div>
+              <h2 className="text-xl font-bold tracking-tight text-foreground">Lojas em Destaque</h2>
 
               {loadingDestaques ? (
                 <div className="flex gap-4 overflow-hidden">
-                  <Skeleton className="h-32 w-[280px] shrink-0 rounded-xl" />
-                  <Skeleton className="h-32 w-[280px] shrink-0 rounded-xl" />
-                  <Skeleton className="h-32 w-[280px] shrink-0 rounded-xl" />
+                  <Skeleton className="h-36 w-[280px] shrink-0 rounded-xl" />
+                  <Skeleton className="h-36 w-[280px] shrink-0 rounded-xl" />
+                  <Skeleton className="h-36 w-[280px] shrink-0 rounded-xl" />
                 </div>
-              ) : filteredDestaques && filteredDestaques.length > 0 ? (
+              ) : filteredDestaques.length > 0 ? (
                 <>
                   {/* Mobile: horizontal scroll */}
                   <ScrollArea className="w-full whitespace-nowrap pb-4 -mx-4 lg:hidden px-4">
@@ -110,8 +107,8 @@ export default function Dashboard() {
                   </div>
                 </>
               ) : (
-                <div className="text-center py-8 text-muted-foreground text-sm">
-                  Nenhuma loja em destaque {bairro !== "todos" ? "neste bairro" : ""}.
+                <div className="text-center py-8 text-muted-foreground text-sm bg-card rounded-xl border border-border">
+                  Nenhuma loja em destaque com os filtros aplicados.
                 </div>
               )}
             </section>
@@ -119,7 +116,6 @@ export default function Dashboard() {
             {/* Categorias */}
             <section className="space-y-4">
               <h2 className="text-xl font-bold tracking-tight text-foreground">Categorias</h2>
-
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {loadingCategorias ? (
                   [1,2,3,4,5,6,7,8].map(i => (

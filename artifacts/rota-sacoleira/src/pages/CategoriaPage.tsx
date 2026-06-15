@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Map, Navigation } from "lucide-react";
 import { RoteiroSheet } from "@/components/RoteiroSheet";
-import { BairroFilter, detectBairro, type Bairro } from "@/components/BairroFilter";
+import { BairroFilter, filterByBairroAndRua, type Bairro } from "@/components/BairroFilter";
 
 export default function CategoriaPage() {
   const { id } = useParams();
@@ -15,6 +15,7 @@ export default function CategoriaPage() {
   const [selectedStores, setSelectedStores] = useState<number[]>([]);
   const [showRoteiro, setShowRoteiro] = useState(false);
   const [bairro, setBairro] = useState<Bairro>("todos");
+  const [ruaSearch, setRuaSearch] = useState("");
 
   const { data: categorias } = useListCategorias({
     query: { queryKey: getListCategoriasQueryKey(), enabled: !!categoryId }
@@ -27,9 +28,7 @@ export default function CategoriaPage() {
     { query: { queryKey: getListLojasQueryKey({ categoriaId: categoryId || undefined }), enabled: !!categoryId } }
   );
 
-  const filteredLojas = lojas?.filter(l =>
-    bairro === "todos" ? true : detectBairro(l.endereco) === bairro
-  );
+  const filteredLojas = filterByBairroAndRua(lojas ?? [], bairro, ruaSearch);
 
   const toggleSelect = (lojaId: number, isSelected: boolean) => {
     if (isSelected) {
@@ -48,10 +47,13 @@ export default function CategoriaPage() {
       <div className="flex-1 flex flex-col relative pb-24">
         <div className="px-4 lg:px-8 py-6 space-y-4">
 
-          {/* Bairro Filter */}
-          <div className="overflow-x-auto -mx-4 lg:-mx-8 px-4 lg:px-8 pb-1">
-            <BairroFilter value={bairro} onChange={setBairro} />
-          </div>
+          {/* Bairro Filter + rua search */}
+          <BairroFilter
+            value={bairro}
+            onChange={setBairro}
+            ruaSearch={ruaSearch}
+            onRuaSearch={setRuaSearch}
+          />
 
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground font-medium">
@@ -68,7 +70,7 @@ export default function CategoriaPage() {
                 <Skeleton key={i} className="h-32 w-full rounded-xl" />
               ))}
             </div>
-          ) : filteredLojas && filteredLojas.length > 0 ? (
+          ) : filteredLojas.length > 0 ? (
             <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
               {filteredLojas.map(loja => (
                 <StoreCard
@@ -86,8 +88,8 @@ export default function CategoriaPage() {
               <Map className="w-12 h-12 text-muted mx-auto mb-4" />
               <h3 className="font-bold text-lg text-foreground mb-1">Nenhuma loja</h3>
               <p className="text-muted-foreground text-sm">
-                {bairro !== "todos"
-                  ? "Nenhuma loja encontrada neste bairro."
+                {bairro !== "todos" || ruaSearch
+                  ? "Nenhuma loja encontrada com os filtros aplicados."
                   : "Ainda não temos lojas cadastradas nesta categoria."}
               </p>
             </div>
