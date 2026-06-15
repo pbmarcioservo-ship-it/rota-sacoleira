@@ -8,11 +8,11 @@ export function AppLayout({ children, title }: { children: React.ReactNode; titl
   const [location] = useLocation();
 
   return (
-    <div className="flex flex-col min-h-[100dvh] w-full max-w-md mx-auto bg-background shadow-2xl relative overflow-hidden">
-      <header className="sticky top-0 z-50 flex items-center h-16 px-4 bg-background/80 backdrop-blur-md border-b border-border">
+    <div className="flex flex-col min-h-[100dvh] w-full max-w-md lg:max-w-7xl mx-auto bg-background shadow-2xl lg:shadow-none relative overflow-hidden">
+      <header className="sticky top-0 z-50 flex items-center h-16 px-4 lg:px-8 bg-background/80 backdrop-blur-md border-b border-border">
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="shrink-0 mr-3 -ml-2 text-foreground">
+            <Button variant="ghost" size="icon" className="shrink-0 mr-3 -ml-2 text-foreground" data-testid="button-menu">
               <Menu className="w-6 h-6" />
             </Button>
           </SheetTrigger>
@@ -25,18 +25,20 @@ export function AppLayout({ children, title }: { children: React.ReactNode; titl
             </div>
             <nav className="flex-1 py-4 px-3 flex flex-col gap-1">
               <Link href="/" className="w-full">
-                <Button 
-                  variant={location === "/" ? "secondary" : "ghost"} 
+                <Button
+                  variant={location === "/" ? "secondary" : "ghost"}
                   className="w-full justify-start h-12 text-base font-medium"
+                  data-testid="link-inicio"
                 >
                   <Home className="w-5 h-5 mr-3 text-primary" />
                   Início
                 </Button>
               </Link>
               <Link href="/favoritos" className="w-full">
-                <Button 
-                  variant={location === "/favoritos" ? "secondary" : "ghost"} 
+                <Button
+                  variant={location === "/favoritos" ? "secondary" : "ghost"}
                   className="w-full justify-start h-12 text-base font-medium"
+                  data-testid="link-favoritos"
                 >
                   <Heart className="w-5 h-5 mr-3 text-primary" />
                   Lojas Favoritas
@@ -52,7 +54,7 @@ export function AppLayout({ children, title }: { children: React.ReactNode; titl
           {title}
         </h1>
       </header>
-      
+
       <main className="flex-1 flex flex-col w-full pb-8">
         {children}
       </main>
